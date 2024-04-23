@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  dev.hust.simpleasia.core.config.KafkaConfiguration, \
+  dev.hust.simpleasia.core.config.MinioConfiguration, \
+  dev.hust.simpleasia.core.config.RestTemplateConfiguration
