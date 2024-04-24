@@ -9,6 +9,8 @@ import dev.hust.simpleasia.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/feedback")
 @RequiredArgsConstructor
@@ -31,11 +33,9 @@ public class FeedbackController {
     }
 
     @GetMapping("/public")
-    public GeneralResponse<FeedbackResponse> getFeedbackList(@RequestParam("movieId") Long movieId,
+    public GeneralResponse<List<FeedbackResponse>> getFeedbackList(@RequestParam("movieId") Long movieId,
                                                              @RequestParam(value = "page", defaultValue = "1") Integer page,
                                                              @RequestParam(value = "size", defaultValue = "4") Integer size) {
         return feedbackService.getFeedbackList(movieId, page, size);
     }
-
-    // Test codespaces
 }

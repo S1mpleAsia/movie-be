@@ -7,9 +7,11 @@ import dev.hust.simpleasia.entity.domain.Movie;
 import dev.hust.simpleasia.entity.dto.*;
 import dev.hust.simpleasia.repository.FeedbackRepository;
 import dev.hust.simpleasia.repository.MovieRepository;
+import dev.hust.simpleasia.repository.UserCredentialRepository;
 import dev.hust.simpleasia.utils.helper.CustomStringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ import java.util.List;
 public class FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final MovieRepository movieRepository;
+    private final UserCredentialRepository userCredentialRepository;
 
     @Transactional
     public GeneralResponse<FeedbackResponse> addFeedback(FeedbackRequest request) {
@@ -121,8 +124,24 @@ public class FeedbackService {
         );
     }
 
-    public GeneralResponse<FeedbackResponse> getFeedbackList(Long movieId, Integer page, Integer size) {
+    public GeneralResponse<List<FeedbackResponse>> getFeedbackList(Long movieId, Integer page, Integer size) {
+        List<Feedback> feedbacks = feedbackRepository.findAllByMovieIdOrderByCreatedAtDesc(movieId, PageRequest.of(page, size));
 
-        return null;
+        List<FeedbackResponse> feedbackResponseList = feedbacks.stream().map(feedback -> {
+            FeedbackResponse feedbackResponse = FeedbackResponse.builder()
+                    .feedback(feedback.getFeedback())
+                    .movieId(movieId)
+                    .userId(feedback.getUserId())
+                    .vote(feedback.getVote())
+                    .build();
+
+            UserCredential userCredential = userCredentialRepository.findById(feedback.getUserId()).orElseThrow(() -> new BusinessException("Can not find credential"));
+
+            feedbackResponse.setUserCredential(userCredential);
+
+            return feedbackResponse;
+        }).collect(Collectors.toList());
+
+        return GeneralResponse.success(feedbackResponseList);
     }
 }
