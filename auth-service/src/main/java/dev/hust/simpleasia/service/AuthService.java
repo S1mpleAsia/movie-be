@@ -33,6 +33,7 @@ public class AuthService {
     private final CustomerOTPService customerOTPService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final UserCredentialRepository userCredentialRepository;
 
     public GeneralResponse<RegisterInitDTO> initRegisterRequest(RegisterInitReq request) {
         String orderId = ULID.random();
@@ -121,5 +122,11 @@ public class AuthService {
 
     public void validateToken(String token) {
         tokenService.validateToken(token);
+    }
+
+    public GeneralResponse<UserCredential> getDetail(String id) {
+        UserCredential credential = userCredentialRepository.findById(id).orElseThrow(() -> new BusinessException("Can not get credential"));
+
+        return GeneralResponse.success(credential);
     }
 }

@@ -4,19 +4,24 @@ import dev.hust.simpleasia.core.entity.GeneralResponse;
 import dev.hust.simpleasia.core.exception.BusinessException;
 import dev.hust.simpleasia.entity.domain.Feedback;
 import dev.hust.simpleasia.entity.domain.Movie;
+import dev.hust.simpleasia.entity.domain.UserCredential;
 import dev.hust.simpleasia.entity.dto.*;
+import dev.hust.simpleasia.port.RestTemplateClient;
 import dev.hust.simpleasia.repository.FeedbackRepository;
 import dev.hust.simpleasia.repository.MovieRepository;
-import dev.hust.simpleasia.repository.UserCredentialRepository;
 import dev.hust.simpleasia.utils.helper.CustomStringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +29,7 @@ import java.util.List;
 public class FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final MovieRepository movieRepository;
-    private final UserCredentialRepository userCredentialRepository;
+    private final RestTemplateClient restTemplateClient;
 
     @Transactional
     public GeneralResponse<FeedbackResponse> addFeedback(FeedbackRequest request) {
@@ -125,7 +130,7 @@ public class FeedbackService {
     }
 
     public GeneralResponse<List<FeedbackResponse>> getFeedbackList(Long movieId, Integer page, Integer size) {
-        List<Feedback> feedbacks = feedbackRepository.findAllByMovieIdOrderByCreatedAtDesc(movieId, PageRequest.of(page, size));
+        Page<Feedback> feedbacks = feedbackRepository.findAllByMovieIdOrderByCreatedAtDesc(movieId, PageRequest.of(page, size));
 
         List<FeedbackResponse> feedbackResponseList = feedbacks.stream().map(feedback -> {
             FeedbackResponse feedbackResponse = FeedbackResponse.builder()
@@ -135,9 +140,16 @@ public class FeedbackService {
                     .vote(feedback.getVote())
                     .build();
 
-            UserCredential userCredential = userCredentialRepository.findById(feedback.getUserId()).orElseThrow(() -> new BusinessException("Can not find credential"));
+            GeneralResponse<UserCredential> userCredential = restTemplateClient.get(
+                            "http://127.0.0.1:8081",
+                            new ParameterizedTypeReference<GeneralResponse<UserCredential>>() {
+                            },
+                            null)
+                    .getBody();
 
-            feedbackResponse.setUserCredential(userCredential);
+            if (userCredential != null && userCredential.getStatus().getStatusCode().equals(HttpStatus.SC_OK)) {
+                feedbackResponse.setUserCredential(userCredential.getData());
+            }
 
             return feedbackResponse;
         }).collect(Collectors.toList());

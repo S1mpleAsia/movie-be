@@ -43,4 +43,9 @@ public class AuthController {
         authService.validateToken(token);
         return "Token is valid";
     }
+
+    @GetMapping("/detail")
+    public GeneralResponse<UserCredential> getDetail(String id) {
+        return authService.getDetail(id);
+    }
 }
