@@ -19,9 +19,10 @@ public class SignInResponse {
     private String password;
     private String fullName;
     private String imagePath;
-    private String backgroundPath;
     private Date createdAt;
     private Date updatedAt;
     private String status;
     private String token;
+    private String role;
+    private String region;
 }

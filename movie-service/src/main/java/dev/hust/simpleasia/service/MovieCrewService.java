@@ -29,4 +29,8 @@ public class MovieCrewService {
                     return crewMapStruct.from(actor, credit);
                 }).toList();
     }
+
+    public void saveAllCredit(List<Credit> creditList) {
+        movieCrewRepository.saveAll(creditList);
+    }
 }

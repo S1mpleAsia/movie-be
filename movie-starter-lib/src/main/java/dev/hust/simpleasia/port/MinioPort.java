@@ -12,4 +12,5 @@ import java.security.NoSuchAlgorithmException;
 public interface MinioPort {
     String getObjectUrl(String objectName) throws InvalidBucketNameException, InsufficientDataException, XmlPullParserException, ErrorResponseException, NoSuchAlgorithmException, IOException, NoResponseException, InvalidKeyException, InternalException;
     void uploadFile(MultipartFile file) throws IOException, MinioException;
+    void uploadFileWithPrefixPath(MultipartFile file, String prefixPath) throws IOException, MinioException;
 }

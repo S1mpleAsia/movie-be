@@ -22,11 +22,11 @@ public class UserCredential {
     private String password;
     private String fullName;
     private String imagePath;
-    private String backgroundPath;
     private Date createdAt;
     private Date updatedAt;
     private String status;
     private String role;
+    private String region;
 
     @PrePersist
     public void init() {

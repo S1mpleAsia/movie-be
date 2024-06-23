@@ -1,10 +1,7 @@
 package dev.hust.simpleasia.controller;
 
 import dev.hust.simpleasia.core.entity.GeneralResponse;
-import dev.hust.simpleasia.entity.dto.FeedbackDeleteResponse;
-import dev.hust.simpleasia.entity.dto.FeedbackOverallResponse;
-import dev.hust.simpleasia.entity.dto.FeedbackRequest;
-import dev.hust.simpleasia.entity.dto.FeedbackResponse;
+import dev.hust.simpleasia.entity.dto.*;
 import dev.hust.simpleasia.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -34,8 +31,23 @@ public class FeedbackController {
 
     @GetMapping("/public")
     public GeneralResponse<List<FeedbackResponse>> getFeedbackList(@RequestParam("movieId") Long movieId,
-                                                             @RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                             @RequestParam(value = "size", defaultValue = "4") Integer size) {
+                                                                   @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                                   @RequestParam(value = "size", defaultValue = "4") Integer size) {
         return feedbackService.getFeedbackList(movieId, page, size);
+    }
+
+    @GetMapping("/public/page")
+    public GeneralResponse<Integer> getFeedbackTotalPage(@RequestParam("movieId") Long movieId) {
+        return feedbackService.getFeedbackTotalPage(movieId);
+    }
+
+    @PutMapping("/private")
+    public GeneralResponse<FeedbackResponse> updateFeedback(@RequestBody FeedbackUpdateRequest request) {
+        return feedbackService.updateFeedback(request);
+    }
+
+    @GetMapping("/private/summary")
+    public GeneralResponse<Integer> getFeedbackSummary(@RequestParam("userId") String userId) {
+        return feedbackService.getFeedbackSummary(userId);
     }
 }

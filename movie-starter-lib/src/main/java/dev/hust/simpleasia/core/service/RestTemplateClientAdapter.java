@@ -34,7 +34,7 @@ public class RestTemplateClientAdapter implements RestTemplateClient {
 
     @Override
     public <T> ResponseEntity<T> get(String url, ParameterizedTypeReference<T> responseType, HttpHeaders headers, Object... uriVariables) {
-        return restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(null, headers), responseType, uriVariables);
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null, headers), responseType, uriVariables);
     }
 
     @Override

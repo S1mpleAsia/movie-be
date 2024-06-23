@@ -9,19 +9,18 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "merchant")
+@Table(name = "merchant_customer")
 @Getter
 @Setter
 @ToString
-public class Merchant {
+public class MerchantCustomer {
     @Id
     @Column(length = 30)
     private String id;
     private String email;
     private String userId;
-    private String merchantId;
+    private String customerId;
     private String merchantName;
-    private Boolean active;
     private Date createdAt;
     private Date updatedAt;
 

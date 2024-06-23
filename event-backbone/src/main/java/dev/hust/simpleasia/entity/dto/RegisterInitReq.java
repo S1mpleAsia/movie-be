@@ -15,12 +15,12 @@ import java.util.Date;
 @SuperBuilder
 public class RegisterInitReq extends BaseEvent {
     private String email;
-    private Integer age;
-    private String locate;
+    private String birthday;
     private String password;
     private String fullName;
     private String imagePath;
-    private String backgroundPath;
+    private String region;
+    private String gender;
     private Date createdAt;
     private Date updatedAt;
 }

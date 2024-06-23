@@ -2,15 +2,13 @@ package dev.hust.simpleasia.controller;
 
 import dev.hust.simpleasia.core.entity.GeneralResponse;
 import dev.hust.simpleasia.entity.domain.UserCredential;
-import dev.hust.simpleasia.entity.dto.RegisterInitDTO;
-import dev.hust.simpleasia.entity.dto.SignInRequest;
-import dev.hust.simpleasia.entity.dto.SignInResponse;
-import dev.hust.simpleasia.entity.dto.VerifyOTPRequest;
+import dev.hust.simpleasia.entity.dto.*;
 import dev.hust.simpleasia.entity.event.RegisterInitReq;
 import dev.hust.simpleasia.service.AuthService;
-import dev.hust.simpleasia.service.CustomerOTPService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -38,6 +36,11 @@ public class AuthController {
         return authService.signIn(request);
     }
 
+    @PostMapping("/resend-otp")
+    public GeneralResponse<Boolean> resendOtp(@RequestBody ResendOtpRequest request) {
+        return authService.resendOtp(request);
+    }
+
     @GetMapping("/validate")
     public String validateToken(@RequestParam("token") String token) {
         authService.validateToken(token);
@@ -45,7 +48,47 @@ public class AuthController {
     }
 
     @GetMapping("/detail")
-    public GeneralResponse<UserCredential> getDetail(String id) {
+    public GeneralResponse<UserCredential> getDetail(@RequestParam("id") String id) {
         return authService.getDetail(id);
+    }
+
+    @GetMapping("/user")
+    public GeneralResponse<List<UserCredential>> getAllUser() {
+        return authService.getAllUser();
+    }
+
+    @PostMapping("/user/update")
+    public GeneralResponse<UserCredential> updateInfo(@RequestBody CredentialUpdateRequest request) {
+        return authService.updateInfo(request);
+    }
+
+    @PostMapping("/user/banned")
+    public GeneralResponse<UserCredential> bannedUser(@RequestBody BannedUserRequest request) {
+        return authService.bannedUser(request);
+    }
+
+    @PostMapping("/check-existed")
+    public GeneralResponse<ExistedUserResponse> checkExisted(@RequestBody SignInRequest request) {
+        return authService.checkExisted(request);
+    }
+
+    @PostMapping("/user/pwd")
+    public GeneralResponse<UserCredential> changePwd(@RequestBody SignInRequest request) {
+        return authService.changePwd(request);
+    }
+
+    @PostMapping("/user/avatar")
+    public GeneralResponse<UserCredential> updateAvatar(@RequestBody AvatarUpdateRequest request) {
+        return authService.updateAvatar(request);
+    }
+
+    @GetMapping("/user/overview")
+    public GeneralResponse<List<Long>> getUserOverview(@RequestParam("period") String period) {
+        return authService.getUserOverview(period);
+    }
+
+    @GetMapping("/user/summary")
+    public GeneralResponse<Long> getTotalUser() {
+        return authService.getTotalUser();
     }
 }

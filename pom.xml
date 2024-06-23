@@ -18,9 +18,9 @@
         <module>auth-service</module>
         <module>discovery-server</module>
         <module>event-backbone</module>
-        <module>notification-service</module>
         <module>movie-service</module>
         <module>payment-service</module>
+        <module>messaging-service</module>
     </modules>
 
     <properties>

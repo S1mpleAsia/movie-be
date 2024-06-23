@@ -1,9 +1,7 @@
 package dev.hust.simpleasia.entity.domain;
 
 import io.azam.ulidj.ULID;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -12,6 +10,9 @@ import java.util.Date;
 @Table(name = "video")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @ToString
 public class Video {
     @Id

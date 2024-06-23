@@ -4,6 +4,7 @@ import dev.hust.simpleasia.core.entity.GeneralResponse;
 import dev.hust.simpleasia.core.exception.BusinessException;
 import dev.hust.simpleasia.core.utils.EventType;
 import dev.hust.simpleasia.core.utils.TopicName;
+import dev.hust.simpleasia.entity.domain.CustomerOTP;
 import dev.hust.simpleasia.entity.domain.UserCredential;
 import dev.hust.simpleasia.entity.dto.*;
 import dev.hust.simpleasia.entity.event.RegisterInitReq;
@@ -13,6 +14,7 @@ import dev.hust.simpleasia.port.KafkaClient;
 import dev.hust.simpleasia.repository.UserCredentialRepository;
 import dev.hust.simpleasia.utils.AccountStatus;
 import dev.hust.simpleasia.utils.Constants;
+import dev.hust.simpleasia.utils.DateUtils;
 import io.azam.ulidj.ULID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.time.*;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -128,5 +131,145 @@ public class AuthService {
         UserCredential credential = userCredentialRepository.findById(id).orElseThrow(() -> new BusinessException("Can not get credential"));
 
         return GeneralResponse.success(credential);
+    }
+
+    public GeneralResponse<List<UserCredential>> getAllUser() {
+        List<UserCredential> userCredentialList = userCredentialRepository.findAll();
+        return GeneralResponse.success(userCredentialList);
+    }
+
+    public GeneralResponse<UserCredential> bannedUser(BannedUserRequest request) {
+        UserCredential userCredential = userCredentialRepository.findById(request.getId())
+                .orElseThrow(() -> new BusinessException("Can not found the user"));
+
+        userCredential.setStatus(AccountStatus.INACTIVE.getStatus());
+        UserCredential response = userCredentialRepository.saveAndFlush(userCredential);
+
+        return GeneralResponse.success(response);
+
+    }
+
+    public GeneralResponse<ExistedUserResponse> checkExisted(SignInRequest request) {
+        UserCredential userCredential = userCredentialRepository.findFirstByEmail(request.getEmail()).orElse(null);
+
+        if (userCredential == null) return GeneralResponse.success(ExistedUserResponse.builder()
+                .email(request.getEmail())
+                .isExisted(false)
+                .build());
+
+        else return GeneralResponse.success(ExistedUserResponse.builder()
+                .email(request.getEmail())
+                .isExisted(true)
+                .build());
+    }
+
+    public GeneralResponse<Boolean> resendOtp(ResendOtpRequest request) {
+        if (request.getEmail() == null) throw new BusinessException("Invalid email");
+
+        userCredentialRepository.findFirstByEmail(request.getEmail()).orElseThrow(() -> new BusinessException("Can not found any account"));
+
+        CustomerOTP customerOTP = CustomerOTP.builder()
+                .orderId(ULID.random())
+                .email(request.getEmail()).build();
+        customerOTPService.generateOTP(customerOTP);
+
+        return GeneralResponse.success(true);
+    }
+
+    public GeneralResponse<UserCredential> updateInfo(CredentialUpdateRequest request) {
+        UserCredential userCredential = userCredentialRepository.findById(request.getId()).orElseThrow(() -> new BusinessException("Can not found any account"));
+
+        if (request.getFullName() != null) userCredential.setFullName(request.getFullName());
+        if (request.getGender() != null) userCredential.setGender(request.getGender());
+        if (request.getBirthday() != null)
+            userCredential.setBirthday(DateUtils.toDate(request.getBirthday(), "yyyy-MM-dd"));
+        if (request.getRegion() != null) userCredential.setRegion(request.getRegion());
+
+        UserCredential persistedCredential = userCredentialRepository.saveAndFlush(userCredential);
+
+        return GeneralResponse.success(persistedCredential);
+    }
+
+    public GeneralResponse<UserCredential> changePwd(SignInRequest request) {
+        UserCredential userCredential = userCredentialRepository.findFirstByEmail(request.getEmail()).orElseThrow(() -> new BusinessException("Can not found account"));
+        userCredential.setPassword(passwordEncoder.encode(request.getPassword()));
+        UserCredential persistedCredential = userCredentialRepository.saveAndFlush(userCredential);
+
+        return GeneralResponse.success(persistedCredential);
+    }
+
+    public GeneralResponse<UserCredential> updateAvatar(AvatarUpdateRequest request) {
+        UserCredential userCredential = userCredentialRepository.findById(request.getId()).orElseThrow(() -> new BusinessException("Can not found user"));
+        userCredential.setImagePath(request.getPath());
+        userCredentialRepository.save(userCredential);
+
+        return GeneralResponse.success(userCredential);
+    }
+
+    public GeneralResponse<List<Long>> getUserOverview(String period) {
+        if (period.equals("Month")) {
+            return GeneralResponse.success(getMonthlyUser());
+        } else if (period.equals("Week")) {
+            return GeneralResponse.success(getWeeklyUser());
+        }
+
+        return GeneralResponse.error("Invalid input format", new BusinessException("Invalid input format"));
+    }
+
+    private List<Long> getWeeklyUser() {
+        LocalDate today = LocalDate.now();
+        LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
+        LocalDate endOfWeek = today.with(DayOfWeek.SUNDAY);
+
+        Date startOfWeekDate = Date.from(startOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endOfWeekDate = Date.from(endOfWeek.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+
+        List<UserCredential> userCredentialList = userCredentialRepository.findAllByDateRange(startOfWeekDate, endOfWeekDate);
+        Map<DayOfWeek, Long> userSummary = new EnumMap<>(DayOfWeek.class);
+
+        for (DayOfWeek day : DayOfWeek.values()) {
+            userSummary.put(day, 0L);
+        }
+
+        for (UserCredential credential : userCredentialList) {
+            LocalDate createdDate = credential.getCreatedAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            DayOfWeek day = createdDate.getDayOfWeek();
+            userSummary.put(day, userSummary.get(day) + 1);
+        }
+
+        // Convert map values to Long[]
+        List<Long> response = new ArrayList<>();
+        for (DayOfWeek day : DayOfWeek.values()) {
+            response.add(userSummary.get(day));
+        }
+
+        return response;
+    }
+
+    private List<Long> getMonthlyUser() {
+        List<UserCredential> userCredentialList = userCredentialRepository.findAllByYear(Year.now().getValue());
+        Map<Month, Long> monthlyUser = new EnumMap<>(Month.class);
+
+        for (Month month : Month.values()) {
+            monthlyUser.put(month, 0L);
+        }
+
+        for (UserCredential userCredential : userCredentialList) {
+            Month month = Month.of(userCredential.getCreatedAt().getMonth());
+
+            monthlyUser.put(month, monthlyUser.get(month) + 1);
+        }
+
+        List<Long> response = new ArrayList<>();
+        for (Month month : Month.values()) {
+            response.add(monthlyUser.get(month));
+        }
+
+        return response;
+    }
+
+    public GeneralResponse<Long> getTotalUser() {
+        long count = userCredentialRepository.count();
+        return GeneralResponse.success(count);
     }
 }

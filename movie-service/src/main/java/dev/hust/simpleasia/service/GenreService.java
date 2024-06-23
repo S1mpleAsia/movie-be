@@ -28,4 +28,8 @@ public class GenreService {
 
         return genreRepository.findByIdIn(genreListId);
     }
+
+    public List<Genre> findAllGenreByNames(List<String> genreNameList) {
+        return genreRepository.findAllByNameIn(genreNameList);
+    }
 }

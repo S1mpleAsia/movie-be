@@ -17,4 +17,8 @@ public class MovieImageService {
     public List<MovieImage> getImageList(Long movieId) {
         return movieImageRepository.findAllByMovieId(movieId);
     }
+
+    public void saveImage(MovieImage movieImage) {
+        movieImageRepository.save(movieImage);
+    }
 }

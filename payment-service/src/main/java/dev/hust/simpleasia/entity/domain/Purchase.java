@@ -1,9 +1,7 @@
 package dev.hust.simpleasia.entity.domain;
 
 import io.azam.ulidj.ULID;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -13,14 +11,16 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
 public class Purchase {
     @Id
     @Column(length = 30)
     private String id;
     private String userId;
-    private String movieId;
-    @Transient
-    private Movie movie;
+    private String type;
     private Date createdAt;
     private Date updatedAt;
 

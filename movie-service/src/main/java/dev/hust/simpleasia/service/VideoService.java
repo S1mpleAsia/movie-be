@@ -17,4 +17,12 @@ public class VideoService {
     public List<Video> getVideoList(Long movieId) {
         return videoRepository.getVideosByMovieId(movieId);
     }
+
+    public Video saveVideo(Video video) {
+        return videoRepository.save(video);
+    }
+
+    public void saveAllVideos(List<Video> videoList) {
+        videoRepository.saveAll(videoList);
+    }
 }

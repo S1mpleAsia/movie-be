@@ -63,6 +63,15 @@ public class FeedbackService {
         Feedback persistedFeedback = feedbackRepository.saveAndFlush(feedback);
         log.info("--- End Feedback insert ---");
 
+        GeneralResponse<UserCredential> userCredential = restTemplateClient.get(
+                        "http://127.0.0.1:8081/api/auth/detail?id={id}",
+                        new ParameterizedTypeReference<GeneralResponse<UserCredential>>() {
+                        },
+                        null, feedback.getUserId())
+                .getBody();
+
+        assert userCredential != null;
+
         return GeneralResponse.success(
                 FeedbackResponse.builder()
                         .id(persistedFeedback.getId())
@@ -70,6 +79,9 @@ public class FeedbackService {
                         .vote(request.getVote())
                         .movieId(movie.getId())
                         .userId(request.getUserId())
+                        .createdAt(persistedFeedback.getCreatedAt())
+                        .updatedAt(persistedFeedback.getUpdatedAt())
+                        .userCredential(userCredential.getData())
                         .build()
         );
     }
@@ -134,17 +146,20 @@ public class FeedbackService {
 
         List<FeedbackResponse> feedbackResponseList = feedbacks.stream().map(feedback -> {
             FeedbackResponse feedbackResponse = FeedbackResponse.builder()
+                    .id(feedback.getId())
                     .feedback(feedback.getFeedback())
                     .movieId(movieId)
                     .userId(feedback.getUserId())
                     .vote(feedback.getVote())
+                    .createdAt(feedback.getCreatedAt())
+                    .updatedAt(feedback.getUpdatedAt())
                     .build();
 
             GeneralResponse<UserCredential> userCredential = restTemplateClient.get(
-                            "http://127.0.0.1:8081",
+                            "http://127.0.0.1:8081/api/auth/detail?id={id}",
                             new ParameterizedTypeReference<GeneralResponse<UserCredential>>() {
                             },
-                            null)
+                            null, feedback.getUserId())
                     .getBody();
 
             if (userCredential != null && userCredential.getStatus().getStatusCode().equals(HttpStatus.SC_OK)) {
@@ -155,5 +170,52 @@ public class FeedbackService {
         }).collect(Collectors.toList());
 
         return GeneralResponse.success(feedbackResponseList);
+    }
+
+    public GeneralResponse<Integer> getFeedbackTotalPage(Long movieId) {
+        List<Feedback> feedbacks = feedbackRepository.findAllByMovieId(movieId);
+
+        Integer page = (int) Math.ceil((double) feedbacks.size() / 3);
+        return GeneralResponse.success(page);
+    }
+
+    @Transactional
+    public GeneralResponse<FeedbackResponse> updateFeedback(FeedbackUpdateRequest request) {
+        Feedback feedback = feedbackRepository.findById(request.getId()).orElseThrow(() -> new BusinessException("Can not found your feedback"));
+
+
+        Movie movie = movieRepository.findById(feedback.getMovieId())
+                .orElseThrow(() -> new BusinessException("Can not find movie"));
+
+        int[] votes = CustomStringUtils.splitStringToIntArray(movie.getVoteOverall(), ",");
+        votes[5 - feedback.getVote()] = votes[5 - feedback.getVote()] - 1;
+        votes[5 - request.getVote()] = votes[5 - request.getVote()] + 1;
+        movie.setVoteOverall(CustomStringUtils.mergeIntArrayToString(votes, ","));
+
+        double newTotalVote = movie.getVoteAverage() * movie.getVoteCount() - feedback.getVote() + request.getVote();
+        movie.setVoteAverage(newTotalVote / movie.getVoteCount());
+
+        feedback.setFeedback(request.getFeedback());
+        feedback.setVote(request.getVote());
+
+        FeedbackResponse response = FeedbackResponse.builder()
+                .id(feedback.getId())
+                .feedback(feedback.getFeedback())
+                .movieId(feedback.getMovieId())
+                .userId(feedback.getUserId())
+                .vote(feedback.getVote())
+                .createdAt(feedback.getCreatedAt())
+                .updatedAt(feedback.getUpdatedAt())
+                .build();
+        movieRepository.save(movie);
+        feedbackRepository.save(feedback);
+
+        return GeneralResponse.success(response);
+    }
+
+    public GeneralResponse<Integer> getFeedbackSummary(String userId) {
+        List<Feedback> feedbacks = feedbackRepository.findAllByUserId(userId);
+
+        return GeneralResponse.success(feedbacks.size());
     }
 }

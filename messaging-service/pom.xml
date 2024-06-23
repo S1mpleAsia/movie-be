@@ -7,10 +7,10 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>notification-service</artifactId>
+    <artifactId>messaging-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>notification-service</name>
+    <name>messaging-service</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -21,9 +21,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>dev.hust.simpleasia</groupId>
-            <artifactId>movie-starter-lib</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>
@@ -35,6 +34,22 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.hust.simpleasia</groupId>
+            <artifactId>movie-starter-lib</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
         <dependency>

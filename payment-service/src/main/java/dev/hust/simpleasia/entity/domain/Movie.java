@@ -18,22 +18,23 @@ import java.util.List;
 public class Movie {
     @Id
     @Column(length = 30)
-    private String id;
+    private Long id;
     private String language;
     private String title;
+    private String genres;
     @Column(columnDefinition = "TEXT")
     private String overview;
-    private Long runtime;
+    private Integer runtime;
     private String backdropPath;
     private String posterPath;
     private Date releaseDate;
-    private String trailerPath;
     private Integer popularity;
+    private Double voteAverage;
+    private Integer voteCount;
+    private String status;
     private String voteOverall;
     @Transient
     private List<MovieImage> imageList;
-    @Transient
-    private List<MovieActorDto> actors;
     @Transient
     private List<Feedback> feedbacks;
     private Date createdAt;
@@ -41,7 +42,6 @@ public class Movie {
 
     @PrePersist
     public void init() {
-        id = ULID.random();
         createdAt = new Date();
     }
 

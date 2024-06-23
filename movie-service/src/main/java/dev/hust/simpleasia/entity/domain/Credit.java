@@ -1,8 +1,6 @@
 package dev.hust.simpleasia.entity.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -10,6 +8,9 @@ import javax.persistence.*;
 @Table(name = "movie_credit")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @ToString
 public class Credit {
     @Id

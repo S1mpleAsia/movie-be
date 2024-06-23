@@ -14,6 +14,7 @@ public class RouteValidator {
             "/api/genre",
             "/api/actor",
             "/api/feedback/public",
+            "/api/payment/summary",
             "/eureka"
     );
 

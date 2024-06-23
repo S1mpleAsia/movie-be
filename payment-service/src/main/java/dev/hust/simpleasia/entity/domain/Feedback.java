@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "feedback")
@@ -17,15 +18,22 @@ public class Feedback {
     @Column(length = 30)
     private String id;
     private String userId;
-    private String movieId;
+    private Long movieId;
     private String feedback;
-    private String vote;
+    private Integer vote;
     @Transient
     private UserCredential userCredential;
+    private Date createdAt;
+    private Date updatedAt;
 
     @PrePersist
     public void init() {
         id = ULID.random();
+        createdAt = new Date();
     }
 
+    @PostPersist
+    public void postPersist() {
+        updatedAt = new Date();
+    }
 }

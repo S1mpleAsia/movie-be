@@ -1,9 +1,7 @@
 package dev.hust.simpleasia.entity.domain;
 
 import dev.hust.simpleasia.entity.dto.CreditDto;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -13,6 +11,9 @@ import java.util.List;
 @Table(name = "movie")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @ToString
 public class Movie {
     @Id
