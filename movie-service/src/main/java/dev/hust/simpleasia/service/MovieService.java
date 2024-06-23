@@ -134,13 +134,6 @@ public class MovieService {
 
         Movie savedMovie = movieRepository.saveAndFlush(movie);
 
-        MovieImage movieImage = MovieImage.builder()
-                .movieId(savedMovie.getId())
-                .imagePath(savedMovie.getBackdropPath())
-                .build();
-
-        movieImageService.saveImage(movieImage);
-
         Video video = Video.builder()
                 .movieId(savedMovie.getId())
                 .official(true)
