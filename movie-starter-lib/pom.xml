@@ -9,9 +9,7 @@
 
     <artifactId>movie-starter-lib</artifactId>
     <packaging>jar</packaging>
-
     <name>movie-starter-lib</name>
-    <url>http://maven.apache.org</url>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -47,4 +45,14 @@
             <version>2.10.1</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.maven.plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>
