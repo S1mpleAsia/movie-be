@@ -83,8 +83,8 @@ public class AuthController {
     }
 
     @GetMapping("/user/overview")
-    public GeneralResponse<List<Long>> getUserOverview(@RequestParam("period") String period) {
-        return authService.getUserOverview(period);
+    public GeneralResponse<List<Long>> getUserOverview(@RequestParam("period") String period, @RequestParam("date") String date) {
+        return authService.getUserOverview(period, date);
     }
 
     @GetMapping("/user/summary")

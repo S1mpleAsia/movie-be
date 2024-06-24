@@ -18,6 +18,7 @@ import dev.hust.simpleasia.entity.dto.StripeCheckoutRequest;
 import dev.hust.simpleasia.port.RestTemplateClient;
 import dev.hust.simpleasia.repository.PurchaseRepository;
 import dev.hust.simpleasia.utils.CustomerUtils;
+import dev.hust.simpleasia.utils.DateUtils;
 import dev.hust.simpleasia.utils.MerchantConstant;
 import dev.hust.simpleasia.utils.PackageType;
 import lombok.RequiredArgsConstructor;
@@ -191,19 +192,21 @@ public class PaymentService {
         );
     }
 
-    public GeneralResponse<List<Long>> getRevenueOverview(String period) {
+    public GeneralResponse<List<Long>> getRevenueOverview(String period, String date) {
         if (period.equals("Month")) {
-            return GeneralResponse.success(getMonthlyRevenue());
+            return GeneralResponse.success(getMonthlyRevenue(date));
 
         } else if (period.equals("Week")) {
-            return GeneralResponse.success(getWeeklyRevenue());
+            return GeneralResponse.success(getWeeklyRevenue(date));
         }
 
         return GeneralResponse.error("Invalid input format", new BusinessException("Invalid input format"));
     }
 
-    private List<Long> getWeeklyRevenue() {
-        LocalDate today = LocalDate.now();
+    private List<Long> getWeeklyRevenue(String dateString) {
+        Date date = DateUtils.formatDate(dateString, "yyyy-MM-dd");
+        assert date != null;
+        LocalDate today = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
         LocalDate endOfWeek = today.with(DayOfWeek.SUNDAY);
 
@@ -232,8 +235,13 @@ public class PaymentService {
         return response;
     }
 
-    private List<Long> getMonthlyRevenue() {
-        List<Purchase> purchaseList = purchaseRepository.findAllByYear(Year.now().getValue());
+    private List<Long> getMonthlyRevenue(String dateString) {
+        Date date = DateUtils.formatDate(dateString, "yyyy-MM-dd");
+        Calendar calendar = Calendar.getInstance();
+        assert date != null;
+        calendar.setTime(date);
+
+        List<Purchase> purchaseList = purchaseRepository.findAllByYear(calendar.get(Calendar.YEAR));
         Map<Month, Long> monthlyPurchases = new EnumMap<>(Month.class);
         for (Month month : Month.values()) {
             monthlyPurchases.put(month, 0L);

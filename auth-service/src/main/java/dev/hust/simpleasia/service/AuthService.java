@@ -206,18 +206,19 @@ public class AuthService {
         return GeneralResponse.success(userCredential);
     }
 
-    public GeneralResponse<List<Long>> getUserOverview(String period) {
+    public GeneralResponse<List<Long>> getUserOverview(String period, String date) {
         if (period.equals("Month")) {
-            return GeneralResponse.success(getMonthlyUser());
+            return GeneralResponse.success(getMonthlyUser(date));
         } else if (period.equals("Week")) {
-            return GeneralResponse.success(getWeeklyUser());
+            return GeneralResponse.success(getWeeklyUser(date));
         }
 
         return GeneralResponse.error("Invalid input format", new BusinessException("Invalid input format"));
     }
 
-    private List<Long> getWeeklyUser() {
-        LocalDate today = LocalDate.now();
+    private List<Long> getWeeklyUser(String dateString) {
+        Date date = DateUtils.toDate(dateString, "yyyy-MM-dd");
+        LocalDate today = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
         LocalDate endOfWeek = today.with(DayOfWeek.SUNDAY);
 
@@ -246,8 +247,11 @@ public class AuthService {
         return response;
     }
 
-    private List<Long> getMonthlyUser() {
-        List<UserCredential> userCredentialList = userCredentialRepository.findAllByYear(Year.now().getValue());
+    private List<Long> getMonthlyUser(String dateString) {
+        Date date = DateUtils.toDate(dateString, "yyyy-MM-dd");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        List<UserCredential> userCredentialList = userCredentialRepository.findAllByYear(calendar.get(Calendar.YEAR));
         Map<Month, Long> monthlyUser = new EnumMap<>(Month.class);
 
         for (Month month : Month.values()) {

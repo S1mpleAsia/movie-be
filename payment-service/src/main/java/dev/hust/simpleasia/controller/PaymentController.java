@@ -31,8 +31,8 @@ public class PaymentController {
     }
 
     @GetMapping("/overview")
-    public GeneralResponse<List<Long>> getRevenueOverview(@RequestParam("period") String period) {
-        return paymentService.getRevenueOverview(period);
+    public GeneralResponse<List<Long>> getRevenueOverview(@RequestParam("period") String period, @RequestParam("date") String date) {
+        return paymentService.getRevenueOverview(period, date);
     }
 
     @GetMapping("/summary")
