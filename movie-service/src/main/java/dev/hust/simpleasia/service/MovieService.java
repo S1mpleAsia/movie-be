@@ -4,7 +4,6 @@ import dev.hust.simpleasia.core.entity.GeneralResponse;
 import dev.hust.simpleasia.core.exception.BusinessException;
 import dev.hust.simpleasia.entity.domain.Genre;
 import dev.hust.simpleasia.entity.domain.Movie;
-import dev.hust.simpleasia.entity.domain.MovieImage;
 import dev.hust.simpleasia.entity.domain.Video;
 import dev.hust.simpleasia.entity.dto.*;
 import dev.hust.simpleasia.mapper.MovieMapstruct;
@@ -21,10 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -229,10 +225,14 @@ public class MovieService {
 
         List<SearchQueryResponse> response = restTemplateClient.get("http://127.0.0.1:5000/search?query={query}&limit={limit}&genres={genres}",
                         new ParameterizedTypeReference<List<SearchQueryResponse>>() {
-                        }, null, request.getQuery(), request.getLimit(), request.getFilter())
+                        }, null, request.getQuery(), request.getLimit(),
+                        request.getFilter() == null || request.getFilter().isEmpty() ? null : genreService.getGenreFromIds(request.getFilter())
+                                .stream()
+                                .map(Genre::getName)
+                                .toList())
                 .getBody();
 
-        assert response != null;
+        if (response == null) return GeneralResponse.success(Collections.emptyList());
         List<Long> movieIdList = response.stream().map(SearchQueryResponse::getMovieId).toList();
         List<Movie> movieList = movieRepository.findAllById(movieIdList);
 

@@ -29,6 +29,10 @@ public class GenreService {
         return genreRepository.findByIdIn(genreListId);
     }
 
+    public List<Genre> getGenreFromIds(List<Long> genreIds) {
+        return genreRepository.findByIdIn(genreIds);
+    }
+
     public List<Genre> findAllGenreByNames(List<String> genreNameList) {
         return genreRepository.findAllByNameIn(genreNameList);
     }
