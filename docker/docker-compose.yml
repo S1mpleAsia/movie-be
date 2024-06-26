@@ -52,3 +52,50 @@ services:
       MINIO_ROOT_USER: minio_user
       MINIO_ROOT_PASSWORD: minio_password
     command: server --console-address ":9001" /data
+
+  api-gateway:
+    image: api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      DISCOVERY_URL: discovery-server
+      KAFKA_URL: broker
+
+  discovery-server:
+    image: discovery-server
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+
+  movie-service:
+    image: movie-service
+    container_name: movie-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_URL: host.docker.internal
+      MINIO_URL: minio
+      DISCOVERY_URL: discovery-server
+      KAFKA_URL: broker
+
+#  auth-service:
+#      image: auth-service
+#      container_name: auth-service
+#      ports:
+#        - "8081:8081"
+#      environment:
+#        DB_URL: host.docker.internal
+#        MINIO_URL: minio
+#        DISCOVERY_URL: discovery-server
+#        KAFKA_URL: broker
+
+#  event-backbone:
+#      image: event-backbone
+#      container_name: event-backbone
+#      ports:
+#        - "8085:8085"
+#      environment:
+#        DB_URL: host.docker.internal
+#        MINIO_URL: minio
+#        KAFKA_URL: broker

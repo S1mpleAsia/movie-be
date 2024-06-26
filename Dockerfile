@@ -38,16 +38,12 @@ RUN mvn clean package -DskipTests -pl ${SERVICE_NAME} -am
 # Use an official OpenJDK runtime as the base image
 FROM eclipse-temurin:17
 ARG SERVICE_NAME=movie-service
-ARG PORT=8080
 
 # Set the working directory inside the container
 WORKDIR /app
 
 # Copy the JAR file from the build stage (assuming it's built under /app/${SERVICE_NAME}/target/)
 COPY --from=build /app/${SERVICE_NAME}/target/*.jar app.jar
-
-# Expose the application port if necessary
-EXPOSE ${PORT}
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
