@@ -61,6 +61,9 @@ services:
     environment:
       DISCOVERY_URL: discovery-server
       KAFKA_URL: broker
+      INTERNAL_IP: host.docker.internal
+    depends_on:
+      - discovery-server
 
   discovery-server:
     image: discovery-server
@@ -78,24 +81,75 @@ services:
       MINIO_URL: minio
       DISCOVERY_URL: discovery-server
       KAFKA_URL: broker
+      KAFKA_PORT: 29092
+      INTERNAL_IP: host.docker.internal
+    depends_on:
+      - api-gateway
 
-#  auth-service:
-#      image: auth-service
-#      container_name: auth-service
-#      ports:
-#        - "8081:8081"
-#      environment:
-#        DB_URL: host.docker.internal
-#        MINIO_URL: minio
-#        DISCOVERY_URL: discovery-server
-#        KAFKA_URL: broker
+  auth-service:
+    image: auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_URL: host.docker.internal
+      MINIO_URL: minio
+      DISCOVERY_URL: discovery-server
+      KAFKA_URL: broker
+      KAFKA_PORT: 29092
+    depends_on:
+      - api-gateway
+      - broker
 
-#  event-backbone:
-#      image: event-backbone
-#      container_name: event-backbone
-#      ports:
-#        - "8085:8085"
-#      environment:
-#        DB_URL: host.docker.internal
-#        MINIO_URL: minio
-#        KAFKA_URL: broker
+  event-backbone:
+    image: event-backbone
+    container_name: event-backbone
+    ports:
+      - "8085:8085"
+    environment:
+      DB_URL: host.docker.internal
+      DISCOVERY_URL: discovery-server
+      MINIO_URL: minio
+      KAFKA_URL: broker
+      KAFKA_PORT: 29092
+    depends_on:
+      - api-gateway
+      - broker
+
+  messaging-service:
+    image: messaging-service
+    container_name: messaging-service
+    ports:
+      - "8088:8088"
+    environment:
+      DB_URL: host.docker.internal
+      DISCOVERY_URL: discovery-server
+      MINIO_URL: minio
+      KAFKA_URL: broker
+      KAFKA_PORT: 29092
+      INTERNAL_IP: host.docker.internal
+    depends_on:
+      - api-gateway
+
+  payment-service:
+    image: payment-service
+    container_name: payment-service
+    ports:
+      - "8084:8084"
+    environment:
+      DB_URL: host.docker.internal
+      DISCOVERY_URL: discovery-server
+      MINIO_URL: minio
+      KAFKA_URL: broker
+      KAFKA_PORT: 29092
+      INTERNAL_IP: host.docker.internal
+    depends_on:
+      - api-gateway
+
+  hybrid-search:
+    image: hybrid-search
+    container_name: hybrid-search
+    ports:
+      - "5000:5000"
+    depends_on:
+      - movie-service
