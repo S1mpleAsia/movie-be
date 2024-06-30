@@ -13,6 +13,7 @@ import dev.hust.simpleasia.utils.helper.CustomStringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +31,8 @@ public class FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final MovieRepository movieRepository;
     private final RestTemplateClient restTemplateClient;
+    @Value("${app.internal.ip}")
+    private String internalIp;
 
     @Transactional
     public GeneralResponse<FeedbackResponse> addFeedback(FeedbackRequest request) {
@@ -64,7 +67,7 @@ public class FeedbackService {
         log.info("--- End Feedback insert ---");
 
         GeneralResponse<UserCredential> userCredential = restTemplateClient.get(
-                        "http://127.0.0.1:8081/api/auth/detail?id={id}",
+                        "http://" + internalIp + ":8081/api/auth/detail?id={id}",
                         new ParameterizedTypeReference<GeneralResponse<UserCredential>>() {
                         },
                         null, feedback.getUserId())
@@ -156,7 +159,7 @@ public class FeedbackService {
                     .build();
 
             GeneralResponse<UserCredential> userCredential = restTemplateClient.get(
-                            "http://127.0.0.1:8081/api/auth/detail?id={id}",
+                            "http://" + internalIp + ":8081/api/auth/detail?id={id}",
                             new ParameterizedTypeReference<GeneralResponse<UserCredential>>() {
                             },
                             null, feedback.getUserId())

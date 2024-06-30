@@ -14,6 +14,7 @@ import dev.hust.simpleasia.utils.helper.DateUtils;
 import dev.hust.simpleasia.utils.helper.MockVoting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,9 @@ public class MovieService {
     private final GenreService genreService;
     private final VideoService videoService;
     private final RestTemplateClient restTemplateClient;
+
+    @Value("${app.internal.ip}")
+    private String internalIp;
 
     public GeneralResponse<List<Movie>> getMovieList(Integer page) {
         List<Movie> movieList = movieRepository.findAll(PageRequest.of(page, 10, Sort.by("releaseDate").descending()))
@@ -195,7 +199,7 @@ public class MovieService {
     }
 
     public GeneralResponse<List<Movie>> getRecommendMovie(String query, Integer limit) {
-        List<RecommendQueryResponse> response = restTemplateClient.get("http://127.0.0.1:5000/recommend?query={query}&limit={limit}",
+        List<RecommendQueryResponse> response = restTemplateClient.get("http://" + internalIp + ":5000/recommend?query={query}&limit={limit}",
                         new ParameterizedTypeReference<List<RecommendQueryResponse>>() {
                         }, null, query, limit)
                 .getBody();
@@ -223,7 +227,7 @@ public class MovieService {
             return GeneralResponse.success(movieRepository.findWithFilter(request.getFilter(), pageable));
         }
 
-        List<SearchQueryResponse> response = restTemplateClient.get("http://127.0.0.1:5000/search?query={query}&limit={limit}&genres={genres}",
+        List<SearchQueryResponse> response = restTemplateClient.get("http://" + internalIp + ":5000/search?query={query}&limit={limit}&genres={genres}",
                         new ParameterizedTypeReference<List<SearchQueryResponse>>() {
                         }, null, request.getQuery(), request.getLimit(),
                         request.getFilter() == null || request.getFilter().isEmpty() ? null : genreService.getGenreFromIds(request.getFilter())

@@ -12,6 +12,7 @@ import dev.hust.simpleasia.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,9 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final MessageMapstruct messageMapstruct;
     private final RestTemplateClient restTemplateClient;
+
+    @Value("${app.internal.ip}")
+    private String internalIp;
 
     public GeneralResponse<List<MessageDto>> getMessages() {
         List<Message> messageList = messageRepository.findAll();
@@ -56,7 +60,7 @@ public class MessageService {
             List<Message> messageList = entry.getValue();
 
             GeneralResponse<UserCredential> response = restTemplateClient
-                    .get("http://127.0.0.1:8081/api/auth/detail?id={id}",
+                    .get("http://" + internalIp + ":8081/api/auth/detail?id={id}",
                             new ParameterizedTypeReference<GeneralResponse<UserCredential>>() {
                             },
                             null,
@@ -82,7 +86,7 @@ public class MessageService {
         messageList.forEach(message -> {
             if (message.getMovieId() != null) {
                 GeneralResponse<MovieDetailResponse> generalResponse = restTemplateClient
-                        .get("http://127.0.0.1:8082/api/movie/{id}",
+                        .get("http://" + internalIp + ":8082/api/movie/{id}",
                                 new ParameterizedTypeReference<GeneralResponse<MovieDetailResponse>>() {
                                 }, null, message.getMovieId())
                         .getBody();

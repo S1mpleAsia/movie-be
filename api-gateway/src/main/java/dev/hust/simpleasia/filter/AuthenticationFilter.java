@@ -4,6 +4,7 @@ import dev.hust.simpleasia.core.exception.BusinessException;
 import dev.hust.simpleasia.port.RestTemplateClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +21,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     private RouteValidator validator;
     @Autowired
     private RestTemplateClient restTemplateClient;
+
+    @Value("${app.internal.ip}")
+    private String internalIp;
 
     public AuthenticationFilter() {
         super(Config.class);
@@ -42,7 +46,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                     authHeader = authHeader.substring(7);
                 }
                 try {
-                    ResponseEntity<String> response = restTemplateClient.get("http://127.0.0.1:8081/api/auth/validate?token={token}", String.class, null, authHeader);
+                    ResponseEntity<String> response = restTemplateClient.get("http://" + internalIp + ":8081/api/auth/validate?token={token}", String.class, null, authHeader);
                     log.info("Token = [{}]", response.getBody());
                 } catch (Exception e) {
                     log.info("RestTemplate retrieved failed");

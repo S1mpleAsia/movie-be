@@ -43,6 +43,9 @@ public class PaymentService {
     @Value("${spring.stripe.webhook.secretKey}")
     private String webhookSecretKey;
 
+    @Value("${app.internal.ip}")
+    private String internalIp;
+
     private final RestTemplateClient restTemplateClient;
     private final PurchaseRepository purchaseRepository;
     private final MerchantCustomerService merchantCustomerService;
@@ -174,7 +177,7 @@ public class PaymentService {
     }
 
     public GeneralResponse<PaymentResponse> getUserPayment(String userId) {
-        GeneralResponse<UserCredential> generalResponse = restTemplateClient.get("http://localhost:8081/api/auth/detail?id={id}",
+        GeneralResponse<UserCredential> generalResponse = restTemplateClient.get("http://" + internalIp + ":8081/api/auth/detail?id={id}",
                 new ParameterizedTypeReference<GeneralResponse<UserCredential>>() {
                 },
                 null,
