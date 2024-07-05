@@ -153,3 +153,16 @@ services:
       - "5000:5000"
     depends_on:
       - movie-service
+
+  db:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:
+    driver: local
