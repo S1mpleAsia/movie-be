@@ -54,7 +54,7 @@ services:
     command: server --console-address ":9001" /data
 
   api-gateway:
-    image: api-gateway
+    image: s1mpleasia/api-gateway:1.0
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -66,13 +66,13 @@ services:
       - discovery-server
 
   discovery-server:
-    image: discovery-server
+    image: s1mpleasia/discovery-server:1.0
     container_name: discovery-server
     ports:
       - "8761:8761"
 
   movie-service:
-    image: movie-service
+    image: s1mpleasia/movie-service:1.0
     container_name: movie-service
     ports:
       - "8082:8082"
@@ -85,10 +85,9 @@ services:
       INTERNAL_IP: host.docker.internal
     depends_on:
       - api-gateway
-      - db
 
   auth-service:
-    image: auth-service
+    image: s1mpleasia/auth-service:1.0
     container_name: auth-service
     ports:
       - "8081:8081"
@@ -101,10 +100,9 @@ services:
     depends_on:
       - api-gateway
       - broker
-      - db
 
   event-backbone:
-    image: event-backbone
+    image: s1mpleasia/event-backbone:1.0
     container_name: event-backbone
     ports:
       - "8085:8085"
@@ -117,10 +115,9 @@ services:
     depends_on:
       - api-gateway
       - broker
-      - db
 
   messaging-service:
-    image: messaging-service
+    image: s1mpleasia/messaging-service:1.0
     container_name: messaging-service
     ports:
       - "8088:8088"
@@ -133,10 +130,9 @@ services:
       INTERNAL_IP: host.docker.internal
     depends_on:
       - api-gateway
-      - db
 
   payment-service:
-    image: payment-service
+    image: s1mpleasia/payment-service:1.0
     container_name: payment-service
     ports:
       - "8084:8084"
@@ -149,26 +145,11 @@ services:
       INTERNAL_IP: host.docker.internal
     depends_on:
       - api-gateway
-      - db
 
   hybrid-search:
-    image: hybrid-search
+    image: s1mpleasia/hybrid-search:1.0
     container_name: hybrid-search
     ports:
       - "5000:5000"
     depends_on:
       - movie-service
-
-  db:
-    image: mariadb
-    environment:
-      MYSQL_ROOT_PASSWORD: ""
-      MYSQL_DATABASE: "movie-db"
-    ports:
-      - "3306:3306"
-    volumes:
-      - mariadb_data:/var/lib/mysql
-
-volumes:
-  mariadb_data:
-    driver: local

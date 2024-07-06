@@ -18,6 +18,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long>, JpaSpecific
     )
     List<Movie> getTopRatedMovieList(Pageable pageable);
 
-    @Query(value = "SELECT m FROM Movie m where m.genres in :genreIds")
-    List<Movie> findWithFilter(@Param("genreIds") List<Long> genreIds, Pageable pageable);
+    @Query(value = "SELECT m FROM Movie m where m.genres like :genreIds")
+    List<Movie> findWithFilter(@Param("genreIds") String genreIds, Pageable pageable);
 }

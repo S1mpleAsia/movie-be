@@ -224,7 +224,9 @@ public class MovieService {
             if (request.getFilter() == null || request.getFilter().isEmpty())
                 return GeneralResponse.success(movieRepository.findAll(pageable).toList());
 
-            return GeneralResponse.success(movieRepository.findWithFilter(request.getFilter(), pageable));
+            List<String> genreStrIds = request.getFilter().stream().map(String::valueOf).toList();
+
+            return GeneralResponse.success(movieRepository.findWithFilter(String.join(",", genreStrIds), pageable));
         }
 
         List<SearchQueryResponse> response = restTemplateClient.get("http://" + internalIp + ":5000/search?query={query}&limit={limit}&genres={genres}",
